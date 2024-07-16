@@ -61,6 +61,7 @@ class Game():
         self.level = 0
         self.load_level(self.level)
         self.screenshake = 0
+        self.hit_count = 0
 
     def load_level(self, map_id):
         self.tilemap.load('ninja_game/data/maps/' + str(map_id) + '.json')
@@ -149,7 +150,10 @@ class Game():
                     if self.player.rect().collidepoint(projectile[0]):
                         self.projectiles.remove(projectile)
                         self.sfx['hit'].play()
-                        self.dead += 1
+                        self.hit_count += 1
+                        if self.hit_count >= self.level + 1:
+                            self.dead += 1
+                            self.hit_count = 0
                         self.screenshake = max(16, self.screenshake)
                         for i in range(20):
                             angle = random.random() * math.pi * 2
