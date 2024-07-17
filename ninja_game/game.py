@@ -9,6 +9,7 @@ from scripts.tilemap import Tilemap
 from scripts.clouds import Clouds
 from scripts.particle import Particle
 from scripts.sparks import Spark
+from scripts.checkpoint_flag import Checkpoint
 
 class Game():
     def __init__(self):
@@ -35,6 +36,7 @@ class Game():
             'player/jump': Animation(load_imgs('entities/player/jump')),
             'player/slide': Animation(load_imgs('entities/player/slide')),
             'player/wall_slide':Animation(load_imgs('entities/player/wall_slide')),
+            'flag': Animation(load_imgs('tiles/flag'),img_dur = 10,loop=True),
             'particle/leaf':Animation(load_imgs('particles/leaf'), img_dur = 20, loop=False),
             'particle/particle':Animation(load_imgs(path='particles/particle'), img_dur=6, loop=False),
             'projectile':load_img('projectile.png'),
@@ -58,6 +60,7 @@ class Game():
         self.player = Player(self,(50,50),(8,15))
         self.tilemap = Tilemap(self, tile_size = 16)
         self.clouds = Clouds(self.assets['clouds'])
+
         self.level = 0
         self.load_level(self.level)
         self.screenshake = 0
@@ -79,10 +82,31 @@ class Game():
             else:
                 self.enemies.append(Enemy(self, spawner['pos'], (8, 15)))
 
+        self.checkpoints = []
+        for flag in self.tilemap.extract([('flag', 0)], keep=False):
+            self.checkpoints.append(Checkpoint(self, flag['pos']))
+
         self.sparks = []
         self.scroll = [0,0]
         self.dead = 0
         self.transition = -30
+
+    def load_from_checkpoint(self):
+        checkpoints_cpy = self.checkpoints.copy()
+        loaded_from_checkpoint = False
+        checkpoints_cpy.reverse()
+
+        for checkpoint in checkpoints_cpy:
+            if checkpoint.is_visited:
+                loaded_from_checkpoint = True
+                self.player.pos[0] = checkpoint.pos[0]
+                self.player.pos[1] = checkpoint.pos[1] 
+                self.dead = 0
+                self.transition = -30
+                break
+        
+        if not loaded_from_checkpoint:
+            self.load_level(self.level)
 
     def run(self):
         pygame.mixer.music.load('ninja_game/data/music.wav')
@@ -109,7 +133,10 @@ class Game():
                 if self.dead >= 10:
                     self.transition = min(30, self.transition + 1)
                 if self.dead > 40:
-                    self.load_level(self.level)
+                    if len(self.checkpoints):
+                        self.load_from_checkpoint()
+                    else:
+                        self.load_level(self.level)
 
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width()/2 - self.scroll[0]) / 10
             self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1]) / 10
@@ -124,6 +151,10 @@ class Game():
             self.clouds.render(self.display, offset=render_scroll)
 
             self.tilemap.render(self.display, offset=render_scroll)
+
+            for checkpoint in self.checkpoints:
+                checkpoint.update()
+                checkpoint.render(self.display, offset=render_scroll)
 
             for enemy in self.enemies:
                 kill = enemy.update(self.tilemap, (0,0))
@@ -151,7 +182,7 @@ class Game():
                         self.projectiles.remove(projectile)
                         self.sfx['hit'].play()
                         self.hit_count += 1
-                        if self.hit_count >= self.level + 1:
+                        if self.hit_count >= 3:
                             self.dead += 1
                             self.hit_count = 0
                         self.screenshake = max(16, self.screenshake)

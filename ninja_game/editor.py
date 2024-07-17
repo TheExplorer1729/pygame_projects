@@ -20,7 +20,8 @@ class Editor():
             'large_decor':load_imgs('tiles/large_decor'),
             'grass':load_imgs('tiles/grass'),
             'stone':load_imgs('tiles/stone'),
-            'spawners': load_imgs('tiles/spawners')
+            'spawners': load_imgs('tiles/spawners'),
+            'flag':load_imgs('tiles/flag')
         }
 
         self.tilemap = Tilemap(self, tile_size = 16)
