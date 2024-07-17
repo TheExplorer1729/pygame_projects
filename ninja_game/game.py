@@ -61,7 +61,7 @@ class Game():
         self.tilemap = Tilemap(self, tile_size = 16)
         self.clouds = Clouds(self.assets['clouds'])
 
-        self.level = 0
+        self.level = 1
         self.load_level(self.level)
         self.screenshake = 0
         self.hit_count = 0
@@ -93,20 +93,13 @@ class Game():
 
     def load_from_checkpoint(self):
         checkpoints_cpy = self.checkpoints.copy()
-        loaded_from_checkpoint = False
-        checkpoints_cpy.reverse()
-
-        for checkpoint in checkpoints_cpy:
-            if checkpoint.is_visited:
-                loaded_from_checkpoint = True
-                self.player.pos[0] = checkpoint.pos[0]
-                self.player.pos[1] = checkpoint.pos[1] 
-                self.dead = 0
-                self.transition = -30
-                break
-        
-        if not loaded_from_checkpoint:
+        if self.player.checkpoint_num == -1:
             self.load_level(self.level)
+        else:
+            self.player.pos[0] = checkpoints_cpy[self.player.checkpoint_num].pos[0]
+            self.player.pos[1] = checkpoints_cpy[self.player.checkpoint_num].pos[1]
+            self.dead = 0
+            self.transition = -30
 
     def run(self):
         pygame.mixer.music.load('ninja_game/data/music.wav')

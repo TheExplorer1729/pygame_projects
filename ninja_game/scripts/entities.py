@@ -81,6 +81,7 @@ class Player(PhysicsEntity):
         self.jumps = 2
         self.wall_slide = False
         self.dashing = 0
+        self.checkpoint_num = -1
 
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
@@ -137,6 +138,11 @@ class Player(PhysicsEntity):
             self.velocity[0] = max(self.velocity[0] - 0.1, 0)
         else:
             self.velocity[0] = min(self.velocity[0] + 0.1, 0)
+
+        for idx, checkpoint in enumerate(self.game.checkpoints.copy()):
+            dist = math.sqrt((self.pos[0] - checkpoint.pos[0])**2 + (self.pos[1] - checkpoint.pos[1])**2)
+            if dist < 4 and idx > self.checkpoint_num:
+                self.checkpoint_num = idx
 
     def jump(self):
         if self.wall_slide:
