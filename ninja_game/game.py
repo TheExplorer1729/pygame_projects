@@ -37,7 +37,8 @@ class Game():
             'player/jump': Animation(load_imgs('entities/player/jump')),
             'player/slide': Animation(load_imgs('entities/player/slide')),
             'player/wall_slide':Animation(load_imgs('entities/player/wall_slide')),
-            'flag': Animation(load_imgs('tiles/flag'),img_dur = 10,loop=True),
+            'flag': Animation(load_imgs('tiles/flag'),img_dur = 6,loop=True),
+            'green_flag': Animation(load_imgs('tiles/green_flag'), img_dur = 6, loop=True),
             'particle/leaf':Animation(load_imgs('particles/leaf'), img_dur = 20, loop=False),
             'particle/particle':Animation(load_imgs(path='particles/particle'), img_dur=6, loop=False),
             'projectile':load_img('projectile.png'),
@@ -62,7 +63,7 @@ class Game():
         self.tilemap = Tilemap(self, tile_size = 16)
         self.clouds = Clouds(self.assets['clouds'])
 
-        self.level = 0
+        self.level = 1
         self.load_level(self.level)
         self.screenshake = 0
         self.hit_count = 0
@@ -217,7 +218,7 @@ class Game():
                         self.movement[1] = True
                     if event.key == pygame.K_SPACE:
                         if self.player.jump():
-                            self.sfx['jump'].play
+                            self.sfx['jump'].play()
                     if event.key == pygame.K_x:
                         self.player.dash()
                     if event.key == pygame.K_f:
@@ -227,8 +228,8 @@ class Game():
                             self.display = pygame.transform.scale(self.display, (self.monitor_size[0] // 2, self.monitor_size[1] // 2))
                             self.assets['background'] = pygame.transform.scale(self.assets['background'], self.display.get_size())
                         else:
-                            self.screen = pygame.display.set_mode((self.screen.get_width(), self.screen.get_height()), pygame.RESIZABLE)
-                            self.display = pygame.transform.scale(self.display, (self.screen.get_width() // 2, self.screen.get_height() // 2))
+                            self.screen = pygame.display.set_mode((640,480), pygame.RESIZABLE)
+                            self.display = pygame.transform.scale(self.display, (320,240))
                             self.assets['background'] = pygame.transform.scale(self.assets['background'], self.display.get_size())                           
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:

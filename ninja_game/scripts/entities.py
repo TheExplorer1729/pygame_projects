@@ -142,10 +142,10 @@ class Player(PhysicsEntity):
         for idx, checkpoint in enumerate(self.game.checkpoints.copy()):
             # Checkpoints must be placed in the required order in the editor in order for this logic to work as intended.
             # For example, checkpoint near to the starting position must be placed first in the editor. 
-            dist = math.sqrt((self.pos[0] - checkpoint.pos[0])**2 + (self.pos[1] - checkpoint.pos[1])**2)
+            dist = abs(self.pos[0] - checkpoint.pos[0]) + abs(self.pos[1] - checkpoint.pos[1])
             if dist < 4 and idx > self.checkpoint_num:
                 self.checkpoint_num = idx
-                print(checkpoint.pos)
+                checkpoint.is_visited = True
 
     def jump(self):
         if self.wall_slide:
