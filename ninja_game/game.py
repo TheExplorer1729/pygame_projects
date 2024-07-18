@@ -16,7 +16,8 @@ class Game():
         pygame.init()
 
         pygame.display.set_caption('Ninja Game')
-        self.screen = pygame.display.set_mode((640,480))
+        self.monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
+        self.screen = pygame.display.set_mode((640,480), pygame.RESIZABLE)
         self.display = pygame.Surface((320,240))
         self.clock = pygame.time.Clock()
 
@@ -61,10 +62,11 @@ class Game():
         self.tilemap = Tilemap(self, tile_size = 16)
         self.clouds = Clouds(self.assets['clouds'])
 
-        self.level = 1
+        self.level = 0
         self.load_level(self.level)
         self.screenshake = 0
         self.hit_count = 0
+        self.fullscreen = False
 
     def load_level(self, map_id):
         self.tilemap.load('ninja_game/data/maps/' + str(map_id) + '.json')
@@ -203,6 +205,11 @@ class Game():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
+                if event.type == pygame.VIDEORESIZE:
+                    if not self.fullscreen:
+                        self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                        self.display = pygame.transform.scale(self.display, (event.w // 2, event.h // 2))
+                        self.assets['background'] = pygame.transform.scale(self.assets['background'], self.display.get_size())
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True
@@ -213,6 +220,16 @@ class Game():
                             self.sfx['jump'].play
                     if event.key == pygame.K_x:
                         self.player.dash()
+                    if event.key == pygame.K_f:
+                        self.fullscreen = not self.fullscreen
+                        if self.fullscreen:
+                            self.screen = pygame.display.set_mode(self.monitor_size, pygame.FULLSCREEN)
+                            self.display = pygame.transform.scale(self.display, (self.monitor_size[0] // 2, self.monitor_size[1] // 2))
+                            self.assets['background'] = pygame.transform.scale(self.assets['background'], self.display.get_size())
+                        else:
+                            self.screen = pygame.display.set_mode((self.screen.get_width(), self.screen.get_height()), pygame.RESIZABLE)
+                            self.display = pygame.transform.scale(self.display, (self.screen.get_width() // 2, self.screen.get_height() // 2))
+                            self.assets['background'] = pygame.transform.scale(self.assets['background'], self.display.get_size())                           
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
